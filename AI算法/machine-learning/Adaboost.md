@@ -1,3 +1,12 @@
+2021.12.11 小结：
+
+- Adaboost使用样本权重和弱分类器权重来调节
+- Adaboost降低bias
+- Adaboost不容易过拟合(在基学习器是弱学习器的前提下)
+- Adaboost和GBDT的区别
+
+
+
 ![Adboost框架图](img/Adaboost/Adboost框架图.png)
 
 
@@ -54,11 +63,13 @@ $$
 $$
 e_{t}=P\left(G_{t}\left(x_{i}\right) \neq y_{i}\right)=\sum_{i=1}^{m} w_{t i} I\left(G_{t}\left(x_{i}\right) \neq y_{i}\right)
 $$
-  - 计算弱分类器 Gt(x) 在最终分类器中的系数(即所占权重)
+  - 计算<font color='MediumTurquoise'>弱分类器 Gt(x)</font> 在最终分类器中的系数(即<font color='MediumTurquoise'>所占权重</font>)
 $$
 \alpha_{t}=\frac{1}{2} \ln \frac{1-e_{t}}{e_{t}}
 $$
-  -  更新训练数据集的权值分布，用于下一轮（t+1）迭代
+  - 更新训练数据集的权值分布，用于下一轮（t+1）迭代 
+
+    <font color='lightgray'>即对于第t+1个分类器，每个样本的权重</font>
 $$
 D(t+1)=\left(w_{t+1,1} ,w_{t+1,2} ,\cdots w_{t+1, i} \cdots, w_{t+1, m}\right)
 $$
@@ -69,50 +80,63 @@ $$
 
    
 
-​		其中 $Z_t$是规范化因子，使得$D(t+1)$成为一个概率分布（和为1）：
+​		其中 $Z_t$ 是规范化因子，使得 $D(t+1)$ 成为一个概率分布（和为1）：
 $$
 Z_{t}=\sum_{j=1}^{m} w_{t,i} \exp \left(-\alpha_{t} y_{i} G_{t}\left(x_{i}\right)\right)
 $$
 
 
-* 集成$T$个弱分类器为1个最终的强分类器：
+* 集成 $T$ 个弱分类器为1个最终的强分类器：
 $$
 G(x)=\operatorname{sign}\left(\sum_{t=1}^{T} \alpha_{t} G_{t}(x)\right)
 $$
 
-
 ## 3. 算法面试题
-### 3.1 Adaboost分类模型的学习器的权重系数$\alpha$怎么计算的？
 
-Adaboost是前向分步加法算法的特例，分类问题的时候认为损失函数指数函数。
+[AdaBoost的理论(细致推导)](https://www.cnblogs.com/pinard/p/6133937.html)
 
-1. 当基函数是分类器时，Adaboost的最终分类器是：
+### 3.1 AdaBoost分类模型的==学习器的权重系数$\alpha$==怎么计算的？
+
+AdaBoost是<u>前向分步加法算法</u>的特例，分类问题的时候认为<u>损失函数指数函数</u>。
+
+1. 当基函数是分类器时，AdaBoost的第k轮得到的分类器<font color='lightgray'>（即强学习器f(x)）</font>是：
    $$
-   f(x)=\sum_{m-1}^{M}{\alpha_mG_m(x)}=f_{m-1}(x)+{\alpha_mG_m(x)}
+   f_k(x)=\sum_{i=1}^{k}{\alpha_iG_i(x)}=f_{i-1}(x)+{\alpha_iG_i(x)}
    $$
-   
-2. 目标是使前向分步算法得到的$\alpha$和$G_m(x)$使$f_m(x)$在训练数据集T上的指数损失函数最小，即
+   AdaBoost的==损失函数==是指数函数，即
    $$
-   (\alpha, G_m(x))=arg min_{\alpha, G}\sum_{i=1}^{N}exp[-y_i(f_{m-1}(x_i)+\alpha G(x_i))]
+   arg min_{\alpha,G}\sum_{i=1}^{m} exp(-y_if_k(x))
    $$
-   其中，$\hat{w}_{mi}=exp[-y_i f_{m-1}(x_i)].$为了求上式的最小化，首先计算$G_m^*(x)$,对于任意的$\alpha >0$,可以转化为下式：
+
+2. 利用前向分步学习算法的关系可以得到损失函数
    $$
-   G_{m}^*=argmin_{G}\sum_{i=1}^{N}\hat{w}_{mi}I(y_i \neq G(x_i))
+   (\alpha, G_k(x))=arg min_{\alpha, G}\sum_{i=1}^{m}exp[-y_i(f_{k-1}(x_i)+\alpha G(x_i))]
    $$
-   之后求$\alpha_m^*$,将上述式子化简，得到
+   令 $\hat{w}_{ki}=exp[-y_i f_{m-1}(x_i)]$ <font color='lightgray'>（它不依赖于α 和G，与最小化无关）</font>
+
+   上式可以转化为
+   $$
+   \begin{align}
+   (\alpha, G_k(x))&=arg min_{\alpha, G}\sum_{i=1}^{m}\hat{w}_{ki}exp[-y_i\alpha G(x_i)]
+   \\
+   &= \sum_{y_i=G_k(x_i)}\hat{w}_{ki}e^{-\alpha} + \sum_{y_i\ne G_k(x_i)}\hat{w}_{ki}e^{\alpha}
+   \\
+   &=(e^{\alpha} - e^{-\alpha})\sum_{i=1}^{m} \hat{w}_{ki}I(y_i \ne G_k(x_i)) + e^{-\alpha} \sum_{x=i}^m \hat{w}_{ki}
+   \end{align}
+   $$
+
+3. 为最小化上式，对于任意的$\alpha >0$, 上式的左项可以转化为下式：
+   $$
+   G_{k}^*=argmin_{G}\sum_{i=1}^{m}\hat{w}_{ki}I(y_i \neq G(x_i))
+   $$
+   将$G^*_k$代入损失函数，对 α 求导使导数为0，可以得到
+   $$
+   \alpha_k^*=\frac{1}{2} log{\frac{1-e_k}{e_k}}
+   $$
+   其中$e_k$是分类误差率:
 
 $$
-\sum_{i=1}^{N}\hat{w}_{mi}exp[-y_i \alpha G(x_i)]
-= \sum_{y_i =G_m(x_i)}\hat{w}_{mi}e^{-\alpha}+\sum_{y_i \neq G_m(x_i)}{\hat{w}_{mi}e^{\alpha}} = (e^{\alpha} - e^{- \alpha})\sum_{i=1}^{N}\hat{w}_{mi}I(y_i \neq G(x_i)) + e^{- \alpha}\sum_{i=1}^{N}\hat{w}_{mi}
-$$
-
-将已经求得的$G_m^*(x)$带入上式面，对$\alpha$求导并等于0，得到最优的$\alpha$.
-$$
-a_m^*=\frac{1}{2} log{\frac{1-e_m}{e_m}}
-$$
-其中$e_m$是分类误差率:
-$$
-e_m=\frac{\sum_{i=1}^{N}\hat{w}_{mi}I(y_i \neq G_m(x_i))}{\sum_{i=1}^{N}\hat{w}_{mi}}=\sum_{i=1}^{N}\hat{w}_{mi}I(y_i \neq G_m(x_i))
+e_k=\frac{\sum_{i=1}^{m}\hat{w}_{ki}I(y_i \neq G_k(x_i))}{\sum_{i=1}^{m}\hat{w}_{ki}}=\sum_{i=1}^{m}\hat{w}_{ki}I(y_i \neq G_k(x_i))
 $$
 
 
@@ -165,37 +189,46 @@ Adaboost也能够应用到回归问题，相应的算法如下:
 
 **注:** **不管是分类问题还是回归问题，根据误差改变权重就是Adaboost的本质，可以基于这个构建相应的强学习器。**
 
-### 3.3 boosting和bagging之间的区别,从偏差-方差的角度解释Adaboost？
+### 3.3 ==boosting和bagging之间的区别,从偏差-方差的角度解释Adaboost==？
 
-集成学习提高学习精度，降低模型误差，模型的误差来自于方差和偏差，其中bagging方式是降低模型方差，一般选择多个相差较大的模型进行bagging。boosting是主要是通过降低模型的偏差来降低模型的误差。其中Adaboost每一轮通过误差来改变数据的分布，使偏差减小。
+集成学习提高学习精度，降低模型误差，模型的误差来自于方差和偏差，
+
+- bagging方式是<font color='red'>**降低模型方差**</font>，一般选择多个相差较大的模型进行bagging
+
+- boosting是主要是通过<font color='red'>**降低模型的偏差**</font>来降低模型的误差
+
+  其中Adaboost每一轮通过误差来改变数据的分布，使偏差减小
 
 ### 3.4 为什么Adaboost方式能够提高整体模型的学习精度？
 
-根据前向分布加法模型，Adaboost算法每一次都会降低整体的误差，虽然单个模型误差会有波动，但是整体的误差却在降低，整体模型复杂度在提高。
+根据前向分布加法模型，Adaboost算法**每一次都会降低整体的误差**，虽然单个模型误差会有波动，但是整体的误差却在降低，整体模型复杂度在提高。
 
 ### 3.5 Adaboost算法如何加入正则项?
 
+为了防止Adaboost过拟合，我们通常也会加入正则化项 $\nu$，这个正则化项我们通常称为学习率(learning rate)
 $$
-f_m(x)=f_{m-1}(x)+\eta \alpha_{m}G_{m}(x)
+f_m(x)=f_{m-1}(x)+ \nu \alpha_{m}G_{m}(x)
 $$
 
 
 
 ### 3.6 Adaboost使用m个基学习器和加权平均使用m个学习器之间有什么不同？
 
-Adaboost的m个基学习器是有顺序关系的，第k个基学习器根据前k-1个学习器得到的误差更新数据分布，再进行学习，每一次的数据分布都不同，是使用同一个学习器在不同的数据分布上进行学习。加权平均的m个学习器是可以并行处理的，在同一个数据分布上，学习得到m个不同的学习器进行加权。
+Adaboost的m个基学习器是有顺序关系的，第k个基学习器根据前k-1个学习器得到的误差更新数据分布，再进行学习，每一次的数据分布都不同，是使用同一个学习器在不同的数据分布上进行学习。
+
+加权平均的m个学习器是可以并行处理的，在同一个数据分布上，学习得到m个不同的学习器进行加权。
 
 ### 3.7 Adaboost和GBDT之间的区别？
 
 相同点：
 
-​	Adaboost和GBDT都是通过减低偏差提高模型精度，都是前项分布加法模型的一种，
+- Adaboost和GBDT都是通过减低偏差提高模型精度，都是前向分布加法模型的一种，
 
 不同点: 
 
-​	Adaboost每一个根据前m-1个模型的误差更新当前数据集的权重，学习第m个学习器；
+- Adaboost每一个根据前m-1个模型的误差更新当前数据集的权重，学习第m个学习器；
 
-​	GBDT是根据前m-1个的学习剩下的label的偏差，修改当前数据的label进行学习第m个学习器，一般使用梯度的负方向替代偏差进行计算。
+- GBDT是根据前m-1个的学习剩下的label的偏差，修改当前数据的label进行学习第m个学习器，一般使用梯度的负方向替代偏差进行计算。
 
  
 
@@ -207,11 +240,18 @@ Adaboost的m个基学习器是有顺序关系的，第k个基学习器根据前k
 
 sklearn中的adaboost接口给出的是使用决策树作为基分类器，一般认为决策树表现良好，其实可以根据数据的分布选择对应的分类器，比如选择简单的逻辑回归，或者对于回归问题选择线性回归。
 
+> 如果采用强学习器(e.g. MLP,SVM)作为"基学习器" 则非常容易过拟合
+
 ### 3.10 MultiBoosting算法将Adaboost作为Bagging的基学习器，Iterative Bagging将Bagging作为Adaboost的基学习器。比较两者的优缺点？
 
-两个模型都是降低方差和偏差。主要的不同的是顺序不同。MultiBosoting先减低模型的偏差再减低模型的方差，这样的方式
-MultiBoosting由于集合了Bagging，Wagging，AdaBoost，可以有效的降低误差和方差，特别是误差。但是训练成本和预测成本都会显著增加。
-Iterative Bagging相比Bagging会降低误差，但是方差上升。由于Bagging本身就是一种降低方差的算法，所以Iterative Bagging相当于Bagging与单分类器的折中。
+两个模型都是降低方差和偏差，但是顺序不同：
+
+- MultiBoosting采用先<font color='green'>减低模型的偏差</font>再<font color='green'>减低模型的方差</font>的方式
+  MultiBoosting由于集合了Bagging，Wagging，AdaBoost，可以有效的降低误差和方（尤其是误差），但是<u>训练成本和预测成本都会显著增加</u>。
+
+- Iterative Bagging相比Bagging会降低误差，<u>但是方差上升</u>
+
+  由于Bagging本身就是一种降低方差的算法，所以Iterative Bagging相当于Bagging与单分类器的折中。
 
 ### 3.11 训练过程中，每轮训练一直存在分类错误的问题，整个Adaboost却能快速收敛，为何？
 
@@ -219,9 +259,11 @@ Iterative Bagging相比Bagging会降低误差，但是方差上升。由于Baggi
 
 ### 3.12 Adaboost 的优缺点？
 
-​	优点：能够基于泛化性能相当弱的的学习器构建出很强的集成，不容易发生过拟合。  
+​	优点：能够基于泛化性能相当弱的的学习器构建出很强的集成，[不容易发生过拟合](https://stats.stackexchange.com/questions/20622/is-adaboost-less-or-more-prone-to-overfitting)。  
 
-​	缺点：对异常样本比较敏感，异常样本在迭代过程中会获得较高的权值，影响最终学习器的性能表现。
+​	缺点：<font color='red'>对异常样本比较敏感</font>，异常样本在迭代过程中会获得较高的权值，影响最终学习器的性能表现。
+
+
 
 ## 参考资料：
 

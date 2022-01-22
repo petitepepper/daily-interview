@@ -1,4 +1,11 @@
+一篇很好的blog：[[NLP] 秒懂词向量Word2vec的本质](https://zhuanlan.zhihu.com/p/26306795)
+
 ## Word2Vector
+
+- 如果是用一个词语作为输入，来预测它周围的上下文，那这个模型叫做『Skip-gram 模型』
+- 而如果是拿一个词语的上下文作为输入，来预测这个词语本身，则是 『CBOW 模型』
+
+
 
 ### 1.什么是词嵌入模型？
 
@@ -103,6 +110,10 @@ $$
 
 - 对每个local context window单独训练，没有利用包 含在global co-currence矩阵中的统计信息。
 - 对多义词无法很好的表示和处理，因为使用了唯一的词向量
+
+
+
+
 
 ## Tf-idf
 

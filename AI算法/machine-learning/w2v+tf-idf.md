@@ -1,5 +1,7 @@
 一篇很好的blog：[[NLP] 秒懂词向量Word2vec的本质](https://zhuanlan.zhihu.com/p/26306795)
 
+[TFIDF算法](http://www.360baidu.cn/seo/tf-idf.html)
+
 ## Word2Vector
 
 - 如果是用一个词语作为输入，来预测它周围的上下文，那这个模型叫做『Skip-gram 模型』

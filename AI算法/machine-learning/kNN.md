@@ -1,3 +1,10 @@
+[20 个问题来测试你的 KNN 算法技能](https://www.analyticsvidhya.com/blog/2021/05/20-questions-to-test-your-skills-on-k-nearest-neighbour/):
+
+- Lazy learner：在测试上比在训练上用时更多
+- (Q14) KNN 是唯一可用于分类变量和连续变量的插补的算法。
+
+
+
 [TOC]
 
 # KNN面试题
@@ -20,21 +27,20 @@ KNN算法利用训练数据集对特征向量空间进行划分。KNN算法的�
 
 - 优点
 
-  ​	算法思想较简单，既可以做分类也可以做回归
-
-  ​	可以用于非线性分类/回归
-
-  ​	训练时间复杂度为O(n)	
-
-  ​	准确率高<font color='orange'>，对数据没有假设，对离群点不敏感 </font>
-
+  - 算法思想较简单，既可以做分类也可以做回归
+  - 可以用于非线性分类/回归
+  - 训练时间复杂度为O(n),**No Training Period**
+  - 准确率高, <font color='orange'>对数据没有假设 </font>
+  
 - 缺点
 
-  ​	计算量大
+  - 不适合大数据集
   
-  ​	存在类别<font color='red'>不平衡问题</font>
+    > KNN 适用于较小的数据集，因为它是一个惰性学习器。它需要存储所有数据，然后仅在运行时做出决定。它包括计算给定点与所有其他点的距离。因此，如果数据集很大，将会有很多处理，这可能会对算法的性能产生不利影响
   
-  ​	需要大量的内存，<font color='orange'>空间复杂度高</font>
+  - 噪音敏感
+  - 存在类别<font color='red'>不平衡问题</font>
+  - 需要大量的内存，<font color='orange'>空间复杂度高</font>
 
 ## 5. 不平衡的样本可以给KNN的预测结果造成哪些问题，有没有什么好的解决方式？
 问题：输入实例的K邻近点中，大数量类别的点会比较多，但其实可能都离实例相对较远，这样会影响最后的分类。 
@@ -52,18 +58,33 @@ KNN算法利用训练数据集对特征向量空间进行划分。KNN算法的�
 	+ 喂给它的数据集是带label的数据，已经是完全正确的数据
 	+ 没有明显的前期训练过程，属于memory-based learning	
 	+ K的含义：来了一个样本x，要给它分类，即求出它的y，就从数据集中，在x附近找离它最近的K个数据点，这K个数据点，类别c占的个数最多，就把x的label设为c
-
 - K-Means
 	+ 1.K-Means是聚类算法 
 	+ 2.非监督学习 
 	+ 3.喂给它的数据集是无label的数据，是杂乱无章的，经过聚类后才变得有点顺序，先无序，后有序
 	+ 有明显的前期训练过程
 	+ K的含义：K是人工固定好的数字，假设数据集合可以分为K个簇，由于是依靠人工定好，需要一点先验知识
-
 - 相似点
 	- 都包含这样的过程，给定一个点，在数据集中找离它最近的点。即二者都用到了NN(Nears Neighbor)算法，一般用KD树来实现NN。
 
-## 8. ==KD树改进==  
+## 8. 是否可以使用KNN算法进行图像处理？
+
+是的，KNN 可以用于图像处理，方法是将 3 维图像转换为一维向量，然后将其用作 KNN 算法的输入。
+
+<img src="https://lh5.googleusercontent.com/Lbz9ZfmKMnobUoxsFhcDOIzACMvw2H0QSW78oexS3OI-f9OAm_g2-ULG29zCyGkkJ0G9za07hI8J-RcOqrEPFlmD1b_EM9OqYMefNT7E4gaziIq_xAG9pvCwU5tfQTP30qnXKdaO" alt="img" style="zoom: 67%;" />
+
+
+
+## 9. KNN v.s. SVM
+
+**SVM**比 KNN 更能处理异常值。
+
+- 如果训练数据远大于特征数量（m>>n）中，KNN 优于 SVM。
+- 当有大量特征和较少的训练数据时，SVM 优于 KNN
+
+
+
+## 10. ==KD树改进==  
 
 - Kd-tree在维度较小时（例如：K≤30），算法的查找效率很高，然而当Kd-tree用于对高维数据（例如：K≥100）进行索引和查找时，就面临着维数灾难（curse of dimension）问题，查找效率会随着维度的增加而迅速下降。通常，实际应用中，我们常常处理的数据都具有高维的特点，例如在图像检索和识别中，每张图像通常用一个几百维的向量来表示，每个特征点的局部特征用一个高维向量来表征（例如：128维的SIFT特征）。因此，为了能够让Kd-tree满足对高维数据的索引，Jeffrey S. Beis和David G. Lowe提出了一种改进算法——Kd-tree with BBF（Best Bin First），该算法能够实现近似K近邻的快速搜索，在保证一定查找精度的前提下使得查找速度较快。
 

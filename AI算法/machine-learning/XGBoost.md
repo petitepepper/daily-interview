@@ -21,7 +21,7 @@
 
 先说说$LR$和$GBDT$的区别： 
 
-- <$LR$是线性模型，可解释性强，很容易并行化，但学习能力有限，<font color='green'>需要</font>大量的人工<font color='green'>特征工程</font>
+- $LR$是线性模型，可解释性强，很容易并行化，但学习能力有限，<font color='green'>需要</font>大量的人工<font color='green'>特征工程</font>
 - <font color='orange'>$GBDT$是非线性模型</font>，具有天然的特征组合优势，特征表达能力强，但是树与树之间<font color='green'>无法并行训练</font>，而且树模型<font color='green'>很容易过拟合；</font>
 
 当在<font color='red'>**高维稀疏特征的场景下，$LR$的效果一般会比$GBDT$好**</font>。原因如下：
